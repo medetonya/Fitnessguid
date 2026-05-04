@@ -1,0 +1,2 @@
+-- Optional migration: legal consent logging (GDPR / consumer proof)
+-- Safe to run multiple times (idempotent)
