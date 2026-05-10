@@ -68,7 +68,7 @@ function App() {
 <Route path="/terms-of-use" element={<TermsOfUsePage />} />
 <Route path="/refund-policy" element={<RefundPolicyPage />} />
 <Route path="/cookie-policy" element={<CookiePolicyPage />} />
-<Route path="/disclaimer" element={<DisclaimerPage />} />
+<Route path="/disclaimer" element={<FitnessDisclaimerPage />} />
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/signup" element={<SignUpPage />} />
