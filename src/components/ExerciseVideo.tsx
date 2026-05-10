@@ -31,7 +31,6 @@ const getYouTubeId = (url: string): string | null => {
 
 const isDirectVideoFile = (url: string) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
 const isImageFile = (url: string) => /\.(gif|png|jpe?g|webp|avif)(\?.*)?$/i.test(url)
-const isMutedByRule = (url: string) => /homesquat|bodyweight-squat/i.test(url)
 
 export default function ExerciseVideo({ videoUrl, title }: ExerciseVideoProps) {
   if (!videoUrl) {
@@ -43,6 +42,18 @@ export default function ExerciseVideo({ videoUrl, title }: ExerciseVideoProps) {
   }
 
   const youtubeId = getYouTubeId(videoUrl)
+
+  const tryStartPlayback = (video: HTMLVideoElement) => {
+    video.muted = true
+    video.defaultMuted = true
+
+    const playPromise = video.play()
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {
+        // Some devices can block autoplay in low-power/data-saver modes.
+      })
+    }
+  }
 
   if (youtubeId) {
     return (
@@ -64,12 +75,17 @@ export default function ExerciseVideo({ videoUrl, title }: ExerciseVideoProps) {
     return (
       <div className="mt-4 overflow-hidden rounded-2xl border border-[#d4d4d8] bg-black">
         <video
+          autoPlay
+          loop
           controls
           playsInline
           controlsList="nofullscreen noremoteplayback nodownload"
           disablePictureInPicture
-          muted={isMutedByRule(videoUrl)}
-          preload="metadata"
+          muted
+          preload="auto"
+          poster="/user-photos/gym-thumb.jpg"
+          onLoadedData={(event) => tryStartPlayback(event.currentTarget)}
+          onCanPlay={(event) => tryStartPlayback(event.currentTarget)}
           className="aspect-video w-full"
           src={videoUrl}
         >
@@ -85,7 +101,7 @@ export default function ExerciseVideo({ videoUrl, title }: ExerciseVideoProps) {
         <img
           src={videoUrl}
           alt={`${title} technique image`}
-          loading="lazy"
+          loading="eager"
           className="aspect-video w-full object-contain"
         />
       </div>

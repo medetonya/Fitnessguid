@@ -171,6 +171,7 @@ SET search_path = public
 AS $$
 DECLARE
   v_user_id UUID;
+  v_session_count INTEGER;
 BEGIN
   v_user_id := auth.uid();
 
@@ -178,13 +179,32 @@ BEGIN
     RAISE EXCEPTION 'Not authorized to increment motivation progress for this user';
   END IF;
 
+  SELECT COUNT(*)::INTEGER
+  INTO v_session_count
+  FROM workout_sessions
+  WHERE user_id = v_user_id
+    AND status = 'completed';
+
   RETURN QUERY
   INSERT INTO user_motivation_progress (user_id, workouts_completed, current_day)
-  VALUES (v_user_id, 1, 1)
+  VALUES (
+    v_user_id,
+    GREATEST(1, COALESCE(v_session_count, 0)),
+    LEAST(36, GREATEST(1, COALESCE(v_session_count, 0)))
+  )
   ON CONFLICT (user_id)
   DO UPDATE SET
-    workouts_completed = user_motivation_progress.workouts_completed + 1,
-    current_day = LEAST(36, user_motivation_progress.current_day + 1),
+    workouts_completed = GREATEST(
+      user_motivation_progress.workouts_completed + 1,
+      COALESCE(v_session_count, 0)
+    ),
+    current_day = LEAST(
+      36,
+      GREATEST(
+        user_motivation_progress.current_day + 1,
+        COALESCE(v_session_count, 0)
+      )
+    ),
     updated_at = NOW()
   RETURNING user_motivation_progress.workouts_completed, user_motivation_progress.current_day;
 END;
@@ -209,6 +229,27 @@ REVOKE ALL ON FUNCTION increment_motivation_progress() FROM PUBLIC;
 REVOKE ALL ON FUNCTION increment_motivation_progress(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION increment_motivation_progress() TO authenticated;
 GRANT EXECUTE ON FUNCTION increment_motivation_progress(UUID) TO authenticated;
+
+WITH session_counts AS (
+  SELECT
+    user_id,
+    COUNT(*)::INTEGER AS completed_count
+  FROM workout_sessions
+  WHERE status = 'completed'
+  GROUP BY user_id
+)
+INSERT INTO user_motivation_progress (user_id, workouts_completed, current_day)
+SELECT
+  u.id,
+  COALESCE(sc.completed_count, 0) AS workouts_completed,
+  LEAST(36, COALESCE(sc.completed_count, 0)) AS current_day
+FROM users u
+LEFT JOIN session_counts sc ON sc.user_id = u.id
+ON CONFLICT (user_id)
+DO UPDATE SET
+  workouts_completed = GREATEST(user_motivation_progress.workouts_completed, EXCLUDED.workouts_completed),
+  current_day = LEAST(36, GREATEST(user_motivation_progress.current_day, EXCLUDED.current_day)),
+  updated_at = NOW();
 
 ALTER TABLE workout_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workout_notes FORCE ROW LEVEL SECURITY;

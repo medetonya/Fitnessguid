@@ -61,12 +61,10 @@ export default function SupportFab() {
                 {t('support.whatsapp')}
               </a>
               <a
-                href="https://www.instagram.com/medeto_fittt?igsh=dHZ0cDM2aGI1d3Yx"
-                target="_blank"
-                rel="noreferrer"
+                href="mailto:supportmedetolab@gmail.com"
                 className="block rounded-2xl border border-[#f3d0e1] bg-[#fdf7fa] px-4 py-3 text-center text-sm font-semibold text-[#9d174d]"
               >
-                {t('support.instagram')}
+                {t('support.email')}
               </a>
             </div>
           </div>

@@ -409,11 +409,7 @@ export default function ProgressTrackingPage() {
   }, [monthResults, viewedMonthKey])
 
   const totalCompletedWorkouts = useMemo(() => {
-    if (motivationWorkoutsCompleted > 0) {
-      return motivationWorkoutsCompleted
-    }
-
-    return Math.max(0, sessionEvents.length)
+    return Math.max(0, motivationWorkoutsCompleted, sessionEvents.length)
   }, [motivationWorkoutsCompleted, sessionEvents.length])
 
   const motivationDayNumber = useMemo(() => {

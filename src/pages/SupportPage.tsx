@@ -1,4 +1,4 @@
-import { ArrowLeft, House, Instagram, MessageCircle, Sparkles } from 'lucide-react'
+import { ArrowLeft, House, Mail, MessageCircle, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLanguage } from '../hooks/useLanguage'
 
@@ -39,13 +39,11 @@ export default function SupportPage() {
             </a>
 
             <a
-              href="https://www.instagram.com/medeto_fittt?igsh=dHZ0cDM2aGI1d3Yx"
-              target="_blank"
-              rel="noreferrer"
+              href="mailto:supportmedetolab@gmail.com"
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#f3d0e1] bg-white px-5 py-4 text-xl font-semibold text-[#be185d]"
             >
-              <Instagram size={20} />
-              {t('support.instagram')}
+              <Mail size={20} />
+              {t('support.email')}
             </a>
           </div>
         </section>
