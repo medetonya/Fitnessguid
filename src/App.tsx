@@ -1,8 +1,3 @@
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
-import TermsOfUsePage from './pages/TermsOfUsePage'
-import RefundPolicyPage from './pages/RefundPolicyPage'
-import CookiePolicyPage from './pages/CookiePolicyPage'
-import DisclaimerPage from './pages/DisclaimerPage'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ScrollToTop from './components/ScrollToTop'
