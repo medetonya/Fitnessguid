@@ -2,6 +2,9 @@ import { ArrowLeft, House, Mail, MessageCircle, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLanguage } from '../hooks/useLanguage'
 
+const SUPPORT_EMAIL = 'supportmedetolab@gmail.com'
+const SUPPORT_EMAIL_LINK = `mailto:${SUPPORT_EMAIL}?subject=MEDETOLAB%20Support%20Request&body=Hello%20MEDETOLAB%20team%2C%0A%0AI%20need%20help%20with%3A%20`
+
 export default function SupportPage() {
   const { t } = useLanguage()
 
@@ -39,11 +42,15 @@ export default function SupportPage() {
             </a>
 
             <a
-              href="mailto:supportmedetolab@gmail.com"
+              href={SUPPORT_EMAIL_LINK}
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#f3d0e1] bg-white px-5 py-4 text-xl font-semibold text-[#be185d]"
             >
               <Mail size={20} />
               {t('support.email')}
+            </a>
+
+            <a href={SUPPORT_EMAIL_LINK} className="block text-center text-sm font-medium text-[#9d174d] underline underline-offset-4">
+              {SUPPORT_EMAIL}
             </a>
           </div>
         </section>

@@ -4,6 +4,8 @@ import { useLocation } from 'react-router-dom'
 import { useLanguage } from '../hooks/useLanguage'
 
 const hiddenPaths = ['/signin', '/signup', '/forgot-password', '/reset-password']
+const SUPPORT_EMAIL = 'supportmedetolab@gmail.com'
+const SUPPORT_EMAIL_LINK = `mailto:${SUPPORT_EMAIL}?subject=MEDETOLAB%20Support%20Request&body=Hello%20MEDETOLAB%20team%2C%0A%0AI%20need%20help%20with%3A%20`
 
 export default function SupportFab() {
   const { pathname } = useLocation()
@@ -61,10 +63,14 @@ export default function SupportFab() {
                 {t('support.whatsapp')}
               </a>
               <a
-                href="mailto:supportmedetolab@gmail.com"
+                href={SUPPORT_EMAIL_LINK}
                 className="block rounded-2xl border border-[#f3d0e1] bg-[#fdf7fa] px-4 py-3 text-center text-sm font-semibold text-[#9d174d]"
               >
                 {t('support.email')}
+              </a>
+
+              <a href={SUPPORT_EMAIL_LINK} className="block text-center text-xs font-medium text-[#9d174d] underline underline-offset-4">
+                {SUPPORT_EMAIL}
               </a>
             </div>
           </div>
