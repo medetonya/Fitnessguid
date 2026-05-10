@@ -1,3 +1,8 @@
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import TermsOfUsePage from './pages/TermsOfUsePage'
+import RefundPolicyPage from './pages/RefundPolicyPage'
+import CookiePolicyPage from './pages/CookiePolicyPage'
+import DisclaimerPage from './pages/DisclaimerPage'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ScrollToTop from './components/ScrollToTop'
@@ -64,6 +69,11 @@ function App() {
         <LanguageSwitcher />
         <SupportFab />
         <Routes>
+<Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+<Route path="/terms-of-use" element={<TermsOfUsePage />} />
+<Route path="/refund-policy" element={<RefundPolicyPage />} />
+<Route path="/cookie-policy" element={<CookiePolicyPage />} />
+<Route path="/disclaimer" element={<DisclaimerPage />} />
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/signup" element={<SignUpPage />} />
