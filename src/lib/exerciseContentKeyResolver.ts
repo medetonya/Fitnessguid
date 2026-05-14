@@ -21,6 +21,8 @@ const exerciseContentAliases: Record<string, string> = {
   [normalizeExerciseName('Hip Thrust Machine')]: normalizeExerciseName('Machine Hip Thrust'),
   [normalizeExerciseName('Bridge Machine')]: normalizeExerciseName('Machine Hip Thrust'),
   [normalizeExerciseName('Bulgarian Squats with dumbbell')]: normalizeExerciseName('Bulgarian Split Squat (Gym)'),
+  [normalizeExerciseName('Romanian Deadlift')]: normalizeExerciseName('Romanian Deadlift with dumbbell/barbell'),
+  [normalizeExerciseName('Romanian Deadlift with dumbbell')]: normalizeExerciseName('Romanian Deadlift with dumbbell/barbell'),
   [normalizeExerciseName('Incline Bench Crunches')]: normalizeExerciseName('Bench Crunches'),
   [normalizeExerciseName('Push-ups (knee, wall, or floor variation based on your level)')]: normalizeExerciseName('Push-Ups'),
   [normalizeExerciseName('Face Pull')]: normalizeExerciseName('Face Pulls'),

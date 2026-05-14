@@ -199,6 +199,7 @@ const isLegPressGuideExercise = (exerciseName: string) => {
 
 const guideChoiceAliasToCanonical: Record<string, string> = {
   [normalizeGuideExerciseName('Romanian Deadlift')]: 'Romanian Deadlift with dumbbell/barbell',
+  [normalizeGuideExerciseName('Romanian Deadlift with dumbbell')]: 'Romanian Deadlift with dumbbell/barbell',
   [normalizeGuideExerciseName('Deadlift')]: 'Deadlift with dumbbell/barbell/Smith',
   [normalizeGuideExerciseName('Light Good Morning')]: 'Good Morning',
   [normalizeGuideExerciseName('Good Morning (с лёгким весом)')]: 'Good Morning',
@@ -315,12 +316,12 @@ const deadliftGuideContent: Record<'ru' | 'en', { title: string; sections: Exerc
     sections: [
       {
         title: '🔹 Glutes',
-        choose: ['Romanian Deadlift', 'Good Morning'],
+        choose: ['Romanian Deadlift with dumbbell', 'Good Morning'],
         focus: 'Hips back + squeeze at the top',
       },
       {
         title: '🔹 Hamstrings',
-        choose: ['Romanian Deadlift', 'Stiff-Leg Deadlift'],
+        choose: ['Romanian Deadlift with dumbbell', 'Stiff-Leg Deadlift'],
         focus: 'Feel the stretch, not the depth',
       },
       {
@@ -330,12 +331,12 @@ const deadliftGuideContent: Record<'ru' | 'en', { title: string; sections: Exerc
       },
       {
         title: '🔹 Beginner / Technique',
-        choose: ['Romanian Deadlift'],
+        choose: ['Romanian Deadlift with dumbbell'],
         focus: 'Hips back first',
       },
       {
         title: '🔹 Back Safety',
-        choose: ['Romanian Deadlift', 'Light Good Morning'],
+        choose: ['Romanian Deadlift with dumbbell', 'Light Good Morning'],
         focus: 'Keep a neutral spine',
       },
       {
