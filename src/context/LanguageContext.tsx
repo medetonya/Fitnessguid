@@ -97,6 +97,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     document.documentElement.lang = language
     document.documentElement.setAttribute('data-language', language)
+    document.documentElement.setAttribute('translate', 'no')
+    document.documentElement.classList.add('notranslate')
+    document.body.setAttribute('translate', 'no')
+    document.body.classList.add('notranslate')
   }, [language])
 
   const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t])

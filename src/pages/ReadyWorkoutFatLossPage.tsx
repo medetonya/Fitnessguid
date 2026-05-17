@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 import { getFatLossReadyWorkoutDays } from '../data/fatLossReadyWorkouts'
 import { useLanguage } from '../hooks/useLanguage'
 import { localizeExerciseName } from '../lib/exerciseTextLocalization'
+import { navigateBackWithFallback } from '../lib/navigation'
 
 export default function ReadyWorkoutFatLossPage() {
   const { language } = useLanguage()
@@ -71,7 +72,7 @@ export default function ReadyWorkoutFatLossPage() {
         <div className="mb-8 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => navigate(goalBasePath)}
+            onClick={() => navigateBackWithFallback(navigate, goalBasePath)}
             className="inline-flex items-center gap-2 text-base font-medium text-gray-600 transition hover:text-gray-900"
           >
             <ArrowLeft size={18} />

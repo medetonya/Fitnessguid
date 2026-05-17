@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import heroFallback from '../assets/hero.png'
 import { useLanguage } from '../hooks/useLanguage'
+import { navigateBackWithFallback } from '../lib/navigation'
 
 interface ActionCard {
   title: string
@@ -62,7 +63,7 @@ export default function FatLossHomePage() {
         <div className="mb-6 flex items-center justify-between md:mb-8">
           <button
             type="button"
-            onClick={() => navigate(isGymRoute ? '/workouts/gym/goal' : '/workouts/home/goal')}
+            onClick={() => navigateBackWithFallback(navigate, isGymRoute ? '/workouts/gym/goal' : '/workouts/home/goal')}
             className="inline-flex items-center gap-2 text-base font-medium text-gray-600 transition hover:text-gray-900"
           >
             <ArrowLeft size={18} />

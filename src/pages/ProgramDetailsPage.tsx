@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { navigateBackWithFallback } from '../lib/navigation'
 import type { Exercise, TrainingProgram } from '../types/index'
 
 interface ProgramExerciseView {
@@ -168,7 +169,7 @@ export default function ProgramDetailsPage() {
           <p className="mb-6 text-gray-600">{error ?? 'Unknown error'}</p>
           <button
             type="button"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigateBackWithFallback(navigate, '/dashboard')}
             className="btn-primary inline-block"
           >
             Come back
@@ -183,7 +184,7 @@ export default function ProgramDetailsPage() {
       <main className="container-max py-10">
         <button
           type="button"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigateBackWithFallback(navigate, '/dashboard')}
           className="mb-6 inline-block text-sm font-medium text-[#111111] hover:text-[#0f0f10]"
         >
           ← Come back

@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-route
 import { getToneReadyWorkoutDay, type ExerciseTag } from '../data/toneReadyWorkouts'
 import { useLanguage } from '../hooks/useLanguage'
 import { localizeExerciseName, localizeExerciseZone, localizeRepsText } from '../lib/exerciseTextLocalization'
+import { navigateBackWithFallback } from '../lib/navigation'
 
 const tagClasses: Record<ExerciseTag, string> = {
   'Main exercise': 'bg-[#e8e8e8] text-[#111111] border-[#d4d4d8]',
@@ -56,7 +57,7 @@ export default function ToneWorkoutSheetPage() {
         <div className="mb-6 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => navigate(`${goalBasePath}/ready-workout`)}
+            onClick={() => navigateBackWithFallback(navigate, `${goalBasePath}/ready-workout`)}
             className="inline-flex items-center gap-2 text-base font-medium text-gray-600 transition hover:text-gray-900"
           >
             <ArrowLeft size={18} />

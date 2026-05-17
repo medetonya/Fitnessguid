@@ -10,6 +10,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
 import { readBuilderWorkoutStorage } from '../lib/builderWorkoutStorage'
 import { incrementMotivationProgress } from '../lib/motivationProgress'
+import { navigateBackWithFallback } from '../lib/navigation'
 import { recordWorkoutSession } from '../lib/workoutSessions'
 import { getWorkoutNoteByKey, upsertWorkoutNote } from '../lib/workoutNotes'
 import { localizeExerciseName, localizeExerciseZone, localizeTechniqueText } from '../lib/exerciseTextLocalization'
@@ -607,7 +608,7 @@ export default function BuilderTrainingModePage() {
         <div className="mb-6 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => navigate(backToSourcePath)}
+            onClick={() => navigateBackWithFallback(navigate, backToSourcePath)}
             className="inline-flex items-center gap-2 text-base font-medium text-[#111111] transition hover:text-[#111111]"
           >
             <ArrowLeft size={18} />

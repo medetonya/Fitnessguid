@@ -10,6 +10,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
 import { localizeExerciseName, localizeExerciseZone, localizeRepsText, localizeTechniqueText } from '../lib/exerciseTextLocalization'
 import { incrementMotivationProgress } from '../lib/motivationProgress'
+import { navigateBackWithFallback } from '../lib/navigation'
 import { recordWorkoutSession } from '../lib/workoutSessions'
 import { getWorkoutNoteByKey, upsertWorkoutNote } from '../lib/workoutNotes'
 
@@ -376,7 +377,7 @@ export default function FatLossTrainingModePage() {
         <div className="mb-6 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => navigate(backToSheetPath)}
+            onClick={() => navigateBackWithFallback(navigate, backToSheetPath)}
             className="inline-flex items-center gap-2 text-base font-medium text-[#111111] transition hover:text-[#111111]"
           >
             <ArrowLeft size={18} />
