@@ -44,15 +44,11 @@ export default function FatLossTrainingModePage() {
   const [currentRound, setCurrentRound] = useState(1)
   const [isFinished, setIsFinished] = useState(false)
   const [running, setRunning] = useState(false)
-  const [restRunning, setRestRunning] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [exerciseCountdown, setExerciseCountdown] = useState(() => {
     const firstReps = day?.exercises[0]?.reps
     return firstReps ? parseExerciseWorkSeconds(firstReps) : 40
   })
-  const [restCountdown, setRestCountdown] = useState(30)
-  const [activeRestSeconds, setActiveRestSeconds] = useState(30)
-  const [pendingStep, setPendingStep] = useState<{ nextIndex: number; nextRound: number } | null>(null)
   const [motivationWorkoutNumber, setMotivationWorkoutNumber] = useState<number | null>(null)
   const [completedExerciseIndexes, setCompletedExerciseIndexes] = useState<Set<string>>(new Set())
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({})
@@ -79,9 +75,6 @@ export default function FatLossTrainingModePage() {
   const noteText = noteKey ? (noteDrafts[noteKey] ?? savedNotes[noteKey] ?? '') : ''
   const currentExerciseWorkSeconds = current ? parseExerciseWorkSeconds(current.reps) : 40
   const hasTimedWork = Boolean(current?.reps && /\b(sec|сек)\b/i.test(current.reps))
-  const exerciseRestSeconds = 30
-  const betweenRoundsRestSeconds = 90
-  const isRestPhase = restRunning || pendingStep !== null
 
   const getExerciseWorkSecondsByIndex = (index: number) => {
     if (!day) {
@@ -216,37 +209,6 @@ export default function FatLossTrainingModePage() {
     return () => window.clearInterval(timer)
   }, [running, hasTimedWork])
 
-  useEffect(() => {
-    if (!restRunning) {
-      return
-    }
-
-    const timer = window.setInterval(() => {
-      setSeconds((prev) => prev + 1)
-      setRestCountdown((prev) => {
-        if (prev <= 1) {
-          setRestRunning(false)
-          return 0
-        }
-
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => window.clearInterval(timer)
-  }, [restRunning])
-
-  useEffect(() => {
-    if (restRunning || !pendingStep || restCountdown !== 0) {
-      return
-    }
-
-    setCurrentIndex(pendingStep.nextIndex)
-    setCurrentRound(pendingStep.nextRound)
-    setExerciseCountdown(getExerciseWorkSecondsByIndex(pendingStep.nextIndex))
-    setPendingStep(null)
-  }, [getExerciseWorkSecondsByIndex, pendingStep, restCountdown, restRunning])
-
   if (!day || !current) {
     return <Navigate to={`${goalBasePath}/ready-workout`} replace />
   }
@@ -274,8 +236,6 @@ export default function FatLossTrainingModePage() {
 
   const finishWorkoutNow = async () => {
     setRunning(false)
-    setRestRunning(false)
-    setPendingStep(null)
 
     if (user) {
       try {
@@ -301,10 +261,6 @@ export default function FatLossTrainingModePage() {
   }
 
   const handleNext = async () => {
-    if (isRestPhase) {
-      return
-    }
-
     setRunning(false)
 
     if (atLastExercise && atFinalRound) {
@@ -312,29 +268,22 @@ export default function FatLossTrainingModePage() {
       return
     }
 
-    const startRestBeforeMove = (nextIndex: number, nextRound: number, restSeconds: number) => {
-      setActiveRestSeconds(restSeconds)
-      setRestCountdown(restSeconds)
-      setPendingStep({ nextIndex, nextRound })
-      setRestRunning(true)
-    }
-
     if (atLastExercise) {
-      startRestBeforeMove(0, currentRound + 1, betweenRoundsRestSeconds)
+      setCurrentIndex(0)
+      setCurrentRound((prev) => prev + 1)
+      setExerciseCountdown(getExerciseWorkSecondsByIndex(0))
       return
     }
 
-    startRestBeforeMove(currentIndex + 1, currentRound, exerciseRestSeconds)
+    setCurrentIndex((prev) => {
+      const nextIndex = prev + 1
+      setExerciseCountdown(getExerciseWorkSecondsByIndex(nextIndex))
+      return nextIndex
+    })
   }
 
   const handlePrev = () => {
-    if (isRestPhase) {
-      return
-    }
-
     setRunning(false)
-    setRestRunning(false)
-    setPendingStep(null)
     setCurrentIndex((prev) => {
       const nextIndex = Math.max(prev - 1, 0)
       setExerciseCountdown(getExerciseWorkSecondsByIndex(nextIndex))
@@ -347,12 +296,8 @@ export default function FatLossTrainingModePage() {
     setCurrentRound(1)
     setIsFinished(false)
     setRunning(false)
-    setRestRunning(false)
-    setPendingStep(null)
     setSeconds(0)
     setExerciseCountdown(getExerciseWorkSecondsByIndex(0))
-    setActiveRestSeconds(exerciseRestSeconds)
-    setRestCountdown(exerciseRestSeconds)
     setCompletedExerciseIndexes(new Set())
   }
 
@@ -463,7 +408,6 @@ export default function FatLossTrainingModePage() {
                 <button
                   type="button"
                   onClick={() => setRunning((prev) => !prev)}
-                  disabled={isRestPhase}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-base font-semibold text-white md:text-lg"
                 >
                   {running ? <Pause size={18} /> : <PlayCircle size={18} />}
@@ -475,7 +419,6 @@ export default function FatLossTrainingModePage() {
                     setRunning(false)
                     setExerciseCountdown(currentExerciseWorkSeconds)
                   }}
-                  disabled={isRestPhase}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-base font-semibold text-white md:text-lg"
                 >
                   <RotateCcw size={18} />
@@ -489,49 +432,6 @@ export default function FatLossTrainingModePage() {
               <p className="mt-2 text-3xl font-black text-[#111111] md:text-4xl">{current.sets} x {localizeRepsText(current.reps, language)}</p>
             </div>
           )}
-
-          <div className="mx-auto mt-4 max-w-3xl rounded-2xl border border-[#d4d4d8] bg-[#efefef] p-6 text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#111111]">{isRussian ? 'Таймер отдыха' : 'Rest Timer'}</p>
-            <p className="mt-2 text-5xl font-black text-[#111111] md:text-6xl">{formatSeconds(restCountdown)}</p>
-            <p className="mt-2 text-sm text-[#52525b]">
-              {isRestPhase
-                ? (isRussian ? 'Идет обязательный отдых перед следующим шагом.' : 'Mandatory rest before the next step is running.')
-                : (isRussian ? `Отдых после упражнения: ${formatSeconds(activeRestSeconds)} (после круга: ${formatSeconds(betweenRoundsRestSeconds)})` : `Rest after exercise: ${formatSeconds(activeRestSeconds)} (after round: ${formatSeconds(betweenRoundsRestSeconds)})`)}
-            </p>
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!pendingStep) {
-                    return
-                  }
-                  setRestRunning((prev) => !prev)
-                }}
-                disabled={!pendingStep}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-base font-semibold text-white disabled:opacity-50 md:text-lg"
-              >
-                {restRunning ? <Pause size={18} /> : <PlayCircle size={18} />}
-                {restRunning ? (isRussian ? 'Пауза' : 'Pause') : (isRussian ? 'Старт' : 'Start')}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!pendingStep) {
-                    setRestRunning(false)
-                    setRestCountdown(activeRestSeconds)
-                    return
-                  }
-
-                  setRestRunning(false)
-                  setRestCountdown(activeRestSeconds)
-                }}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-base font-semibold text-white md:text-lg"
-              >
-                <RotateCcw size={18} />
-                {isRussian ? 'Сброс' : 'Reset'}
-              </button>
-            </div>
-          </div>
 
           <div className="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl border border-[#d4d4d8]">
             <div className="border-r border-[#d4d4d8] p-6">
@@ -598,7 +498,7 @@ export default function FatLossTrainingModePage() {
             <button
               type="button"
               onClick={handlePrev}
-              disabled={currentIndex === 0 || isRestPhase}
+              disabled={currentIndex === 0}
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#111111] px-5 py-3 text-lg font-semibold text-white disabled:opacity-50 md:text-xl"
             >
               <ChevronLeft size={20} />
@@ -607,14 +507,11 @@ export default function FatLossTrainingModePage() {
             <button
               type="button"
               onClick={handleNext}
-              disabled={isRestPhase}
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#111111] px-5 py-3 text-lg font-semibold text-white md:text-xl"
             >
-              {isRestPhase
-                ? (isRussian ? 'Идет отдых...' : 'Rest in progress...')
-                : atLastExercise
-                  ? (atFinalRound ? (isRussian ? 'Завершить тренировку' : 'Finish Workout') : (isRussian ? `Начать круг ${currentRound + 1}` : `Start Round ${currentRound + 1}`))
-                  : (isRussian ? 'Следующее упражнение' : 'Next Exercise')}
+              {atLastExercise
+                ? (atFinalRound ? (isRussian ? 'Завершить тренировку' : 'Finish Workout') : (isRussian ? `Начать круг ${currentRound + 1}` : `Start Round ${currentRound + 1}`))
+                : (isRussian ? 'Следующее упражнение' : 'Next Exercise')}
               <ChevronRight size={20} />
             </button>
           </div>

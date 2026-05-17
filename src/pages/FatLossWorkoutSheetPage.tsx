@@ -1,4 +1,4 @@
-import { ArrowLeft, Circle, House, ListChecks, PlayCircle, RotateCcw } from 'lucide-react'
+import { ArrowLeft, House, ListChecks, PlayCircle, RotateCcw } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getFatLossReadyWorkoutDay, type FatLossExerciseTag } from '../data/fatLossReadyWorkouts'
 import { useLanguage } from '../hooks/useLanguage'
@@ -120,7 +120,6 @@ export default function FatLossWorkoutSheetPage() {
                   </div>
                 </div>
 
-                <Circle size={28} className="mt-1 text-gray-300" />
               </div>
             </article>
           ))}

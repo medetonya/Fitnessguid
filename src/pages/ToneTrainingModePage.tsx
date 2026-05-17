@@ -89,8 +89,6 @@ export default function ToneTrainingModePage() {
     const firstReps = day?.exercises[0]?.reps
     return firstReps ? parseExerciseWorkSeconds(firstReps) : 40
   })
-  const [restRunning, setRestRunning] = useState(false)
-  const [restCountdown, setRestCountdown] = useState(90)
   const [motivationWorkoutNumber, setMotivationWorkoutNumber] = useState<number | null>(null)
   const [completedExerciseIndexes, setCompletedExerciseIndexes] = useState<Set<number>>(new Set())
   const [repsRowsByExercise, setRepsRowsByExercise] = useState<Record<string, RepsSetRow[]>>({})
@@ -195,25 +193,6 @@ export default function ToneTrainingModePage() {
   }, [running, hasTimedWork])
 
   useEffect(() => {
-    if (!restRunning) {
-      return
-    }
-
-    const timer = window.setInterval(() => {
-      setRestCountdown((prev) => {
-        if (prev <= 1) {
-          setRestRunning(false)
-          return 0
-        }
-
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => window.clearInterval(timer)
-  }, [restRunning])
-
-  useEffect(() => {
     if (!noteKey || !user?.id) {
       return
     }
@@ -282,11 +261,6 @@ export default function ToneTrainingModePage() {
   const resetExerciseTimer = () => {
     setRunning(false)
     setExerciseCountdown(currentExerciseWorkSeconds)
-  }
-
-  const resetRestTimer = () => {
-    setRestRunning(false)
-    setRestCountdown(90)
   }
 
   const persistToneWorkoutSession = async () => {
@@ -411,14 +385,12 @@ export default function ToneTrainingModePage() {
     }
 
     setRunning(false)
-    resetRestTimer()
     setExerciseCountdown(getExerciseWorkSecondsByIndex(currentIndex + 1))
     setCurrentIndex((prev) => prev + 1)
   }
 
   const handlePrev = () => {
     setRunning(false)
-    resetRestTimer()
     setCurrentIndex((prev) => {
       const nextIndex = Math.max(prev - 1, 0)
       setExerciseCountdown(getExerciseWorkSecondsByIndex(nextIndex))
@@ -430,10 +402,8 @@ export default function ToneTrainingModePage() {
     setCurrentIndex(0)
     setIsFinished(false)
     setRunning(false)
-    setRestRunning(false)
     setElapsedSeconds(0)
     setExerciseCountdown(getExerciseWorkSecondsByIndex(0))
-    setRestCountdown(90)
     setCompletedExerciseIndexes(new Set())
   }
 
@@ -552,30 +522,6 @@ export default function ToneTrainingModePage() {
               </div>
             </div>
           )}
-
-          <div className="mx-auto mt-4 max-w-3xl rounded-2xl border border-[#d4d4d8] bg-[#efefef] p-6 text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#111111]">{isRussian ? 'Таймер отдыха' : 'Rest Timer'}</p>
-            <p className="mt-2 text-5xl font-black text-[#111111] md:text-6xl">{formatSeconds(restCountdown)}</p>
-            <p className="mt-2 text-sm text-[#52525b]">{isRussian ? 'Стандартный отдых между упражнениями: 1:30' : 'Standard rest between exercises: 1:30'}</p>
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setRestRunning((prev) => !prev)}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-base font-semibold text-white md:text-lg"
-              >
-                {restRunning ? <Pause size={18} /> : <PlayCircle size={18} />}
-                {restRunning ? (isRussian ? 'Пауза' : 'Pause') : (isRussian ? 'Старт' : 'Start')}
-              </button>
-              <button
-                type="button"
-                onClick={resetRestTimer}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-base font-semibold text-white md:text-lg"
-              >
-                <RotateCcw size={18} />
-                {isRussian ? 'Сброс' : 'Reset'}
-              </button>
-            </div>
-          </div>
 
           <div className="mt-4 grid grid-cols-2 overflow-hidden rounded-2xl border border-[#d4d4d8]">
             <div className="border-r border-[#d4d4d8] p-6 text-center">

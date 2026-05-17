@@ -1,4 +1,4 @@
-import { ArrowLeft, Circle, House, ListChecks, PlayCircle, RotateCcw } from 'lucide-react'
+import { ArrowLeft, House, ListChecks, PlayCircle, RotateCcw } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getToneReadyWorkoutDay, type ExerciseTag } from '../data/toneReadyWorkouts'
 import { useLanguage } from '../hooks/useLanguage'
@@ -118,7 +118,6 @@ export default function ToneWorkoutSheetPage() {
                   </div>
                 </div>
 
-                <Circle size={28} className="mt-1 text-gray-300" />
               </div>
             </article>
           ))}
