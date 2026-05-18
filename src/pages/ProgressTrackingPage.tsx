@@ -432,12 +432,38 @@ export default function ProgressTrackingPage() {
   const canSwipeDelete = (_session: WorkoutDaySession) => true
 
   const formatSessionTitle = (session: WorkoutDaySession) => {
-    if (!isRussian) {
+    const normalizedTitle = session.title.trim().toLowerCase()
+
+    if (isRussian) {
+      if (session.source === 'builder' || normalizedTitle === 'builder workout') {
+        return 'Тренировка из конструктора'
+      }
+
+      const fatLossMatch = session.title.match(/^fat\s+loss\s+day\s+(\d+)$/i)
+      if (fatLossMatch) {
+        return `Похудение день ${fatLossMatch[1]}`
+      }
+
+      const toneMatch = session.title.match(/^tone\s+day\s+(\d+)$/i)
+      if (toneMatch) {
+        return `Тонус день ${toneMatch[1]}`
+      }
+
       return session.title
     }
 
-    if (session.source === 'builder' || session.title.trim().toLowerCase() === 'builder workout') {
-      return 'Тренировка из конструктора'
+    if (session.source === 'builder' || normalizedTitle === 'тренировка из конструктора') {
+      return 'Builder workout'
+    }
+
+    const fatLossRuMatch = session.title.match(/^похудение\s+день\s+(\d+)$/i)
+    if (fatLossRuMatch) {
+      return `Fat loss day ${fatLossRuMatch[1]}`
+    }
+
+    const toneRuMatch = session.title.match(/^тонус\s+день\s+(\d+)$/i)
+    if (toneRuMatch) {
+      return `Tone day ${toneRuMatch[1]}`
     }
 
     return session.title
@@ -483,12 +509,52 @@ export default function ProgressTrackingPage() {
       .join('')
   }
 
+  const localizeSummaryTokenEn = (token: string) => {
+    const trimmed = token.trim()
+    if (!trimmed) {
+      return token
+    }
+
+    const leadingWhitespace = token.match(/^\s*/)?.[0] ?? ''
+    const trailingWhitespace = token.match(/\s*$/)?.[0] ?? ''
+
+    let normalized = trimmed
+      .replace(/^Заметки:/i, 'Notes:')
+      .replace(/^Круговая тренировка\. Выполненные шаги:/i, 'Circuit workout. Completed steps:')
+
+    const dashIndex = normalized.indexOf(' - ')
+    if (dashIndex > 0) {
+      const exerciseName = normalized.slice(0, dashIndex).trim()
+      const rest = normalized.slice(dashIndex + 3)
+      normalized = `${localizeExerciseName(exerciseName, 'en')} - ${rest}`
+      return `${leadingWhitespace}${normalized}${trailingWhitespace}`
+    }
+
+    const colonIndex = normalized.indexOf(': ')
+    if (colonIndex > 0) {
+      const label = normalized.slice(0, colonIndex).trim()
+      const rest = normalized.slice(colonIndex + 2)
+      const localizedLabel = label === 'Notes' ? label : (label === 'Заметки' ? 'Notes' : localizeExerciseName(label, 'en'))
+      normalized = `${localizedLabel}: ${rest}`
+      return `${leadingWhitespace}${normalized}${trailingWhitespace}`
+    }
+
+    return `${leadingWhitespace}${normalized}${trailingWhitespace}`
+  }
+
+  const localizeSummaryForEn = (summary: string) => {
+    return summary
+      .split(/([;|\n])/g)
+      .map((part) => (part === ';' || part === '|' || part === '\n' ? part : localizeSummaryTokenEn(part)))
+      .join('')
+  }
+
   const formatSummaryText = (summary: string | null) => {
     if (!summary) {
       return isRussian ? 'Подробная сводка не записана.' : 'Detailed summary is not recorded.'
     }
 
-    const localizedSummary = isRussian ? localizeSummaryForRu(summary) : summary
+    const localizedSummary = isRussian ? localizeSummaryForRu(summary) : localizeSummaryForEn(summary)
 
     return localizedSummary
       .replace(/\s*\|\s*/g, '\n')

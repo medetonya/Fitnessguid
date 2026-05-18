@@ -897,7 +897,22 @@ const exerciseNameRuMap = new Map<string, string>(
   exercisePhraseMap.map(([from, to]) => [normalizeExerciseName(from), to])
 )
 
+const normalizeLocalizedName = (name: string) => name.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, ' ').trim()
+
+const exerciseNameEnMap = new Map<string, string>()
+for (const [enName, ruName] of exercisePhraseMap) {
+  const key = normalizeLocalizedName(ruName)
+  if (!exerciseNameEnMap.has(key)) {
+    exerciseNameEnMap.set(key, enName)
+  }
+}
+
 export function localizeExerciseName(name: string, language: string): string {
+  if (language === 'en') {
+    const backToEnglish = exerciseNameEnMap.get(normalizeLocalizedName(name))
+    return backToEnglish ?? name
+  }
+
   if (language !== 'ru') {
     return name
   }
