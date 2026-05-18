@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../hooks/useLanguage'
+import { localizeExerciseName } from '../lib/exerciseTextLocalization'
 import { getMotivationMessage } from '../lib/motivationProgress'
 import { supabase } from '../lib/supabase'
 import { deleteWorkoutNotesByPrefix } from '../lib/workoutNotes'
@@ -430,12 +431,66 @@ export default function ProgressTrackingPage() {
 
   const canSwipeDelete = (_session: WorkoutDaySession) => true
 
+  const formatSessionTitle = (session: WorkoutDaySession) => {
+    if (!isRussian) {
+      return session.title
+    }
+
+    if (session.source === 'builder' || session.title.trim().toLowerCase() === 'builder workout') {
+      return 'Тренировка из конструктора'
+    }
+
+    return session.title
+  }
+
+  const localizeSummaryTokenRu = (token: string) => {
+    const trimmed = token.trim()
+    if (!trimmed) {
+      return token
+    }
+
+    const leadingWhitespace = token.match(/^\s*/)?.[0] ?? ''
+    const trailingWhitespace = token.match(/\s*$/)?.[0] ?? ''
+
+    let normalized = trimmed
+      .replace(/^Notes:/i, 'Заметки:')
+      .replace(/^Circuit workout\. Completed steps:/i, 'Круговая тренировка. Выполненные шаги:')
+
+    const dashIndex = normalized.indexOf(' - ')
+    if (dashIndex > 0) {
+      const exerciseName = normalized.slice(0, dashIndex).trim()
+      const rest = normalized.slice(dashIndex + 3)
+      normalized = `${localizeExerciseName(exerciseName, 'ru')} - ${rest}`
+      return `${leadingWhitespace}${normalized}${trailingWhitespace}`
+    }
+
+    const colonIndex = normalized.indexOf(': ')
+    if (colonIndex > 0) {
+      const label = normalized.slice(0, colonIndex).trim()
+      const rest = normalized.slice(colonIndex + 2)
+      const localizedLabel = label === 'Заметки' ? label : localizeExerciseName(label, 'ru')
+      normalized = `${localizedLabel}: ${rest}`
+      return `${leadingWhitespace}${normalized}${trailingWhitespace}`
+    }
+
+    return `${leadingWhitespace}${normalized}${trailingWhitespace}`
+  }
+
+  const localizeSummaryForRu = (summary: string) => {
+    return summary
+      .split(/([;|\n])/g)
+      .map((part) => (part === ';' || part === '|' || part === '\n' ? part : localizeSummaryTokenRu(part)))
+      .join('')
+  }
+
   const formatSummaryText = (summary: string | null) => {
     if (!summary) {
       return isRussian ? 'Подробная сводка не записана.' : 'Detailed summary is not recorded.'
     }
 
-    return summary
+    const localizedSummary = isRussian ? localizeSummaryForRu(summary) : summary
+
+    return localizedSummary
       .replace(/\s*\|\s*/g, '\n')
       .replace(/;\s*/g, ';\n')
   }
@@ -600,6 +655,19 @@ export default function ProgressTrackingPage() {
   useEffect(() => {
     setSelectedDayKey(null)
   }, [monthOffset])
+
+  useEffect(() => {
+    if (!selectedDayKey) {
+      return
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [selectedDayKey])
 
   const closeSwipeDelete = (sessionId: string) => {
     setSwipeOffsets((prev) => ({
@@ -820,7 +888,7 @@ export default function ProgressTrackingPage() {
       {selectedDayKey && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-4 sm:items-center" onClick={() => setSelectedDayKey(null)}>
           <div
-            className={`w-full ${selectedDaySessions.some((item) => (item.sessionSummary ?? '').length > 180) ? 'max-w-2xl' : 'max-w-md'} max-h-[82vh] overflow-y-auto rounded-3xl border border-[#d4d4d8] bg-white p-5 shadow-2xl`}
+            className={`w-full ${selectedDaySessions.some((item) => (item.sessionSummary ?? '').length > 180) ? 'max-w-2xl' : 'max-w-md'} max-h-[82vh] overflow-y-auto overscroll-contain rounded-3xl border border-[#d4d4d8] bg-white p-5 shadow-2xl`}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
@@ -843,7 +911,7 @@ export default function ProgressTrackingPage() {
                 {selectedDaySessions.map((session) => (
                   <div key={session.id} className="overflow-hidden rounded-xl border border-[#d4d4d8] bg-[#f5f5f5]">
                     {canSwipeDelete(session) ? (
-                      <div className="relative min-h-[112px]">
+                      <div className="relative">
                         <div className="absolute inset-y-0 right-0 flex w-28 items-center justify-center bg-[#111111] text-sm font-semibold text-white">
                           <button
                             type="button"
@@ -856,7 +924,7 @@ export default function ProgressTrackingPage() {
                         </div>
 
                         <article
-                          className="absolute inset-0 bg-[#f5f5f5] p-3"
+                          className="relative z-10 bg-[#f5f5f5] p-3"
                           style={{
                             transform: `translateX(${swipeOffsets[session.id] ?? 0}px)`,
                             transition: swipingSessionId === session.id ? 'none' : 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
@@ -916,7 +984,7 @@ export default function ProgressTrackingPage() {
                           }}
                         >
                           <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm font-semibold text-[#111111]">{session.title}</p>
+                            <p className="text-sm font-semibold text-[#111111]">{formatSessionTitle(session)}</p>
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
@@ -934,7 +1002,7 @@ export default function ProgressTrackingPage() {
                       </div>
                     ) : (
                       <article className="p-3">
-                        <p className="text-sm font-semibold text-[#111111]">{session.title}</p>
+                        <p className="text-sm font-semibold text-[#111111]">{formatSessionTitle(session)}</p>
                         <div className="mt-1 flex justify-end">
                           <button
                             type="button"
